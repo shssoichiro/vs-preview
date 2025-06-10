@@ -181,9 +181,7 @@ class GraphicsView(QGraphicsView):
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorUnderMouse)
         self.drag_mode = self.dragMode()
 
-        self.main.reload_stylesheet_signal.connect(
-            lambda: self.setBackgroundBrush(self.main.palette().brush(QPalette.ColorRole.Window))
-        )
+        self.main.reload_stylesheet_signal.connect(self._update_background_brush)
 
         self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
         self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag)
@@ -209,6 +207,15 @@ class GraphicsView(QGraphicsView):
         self.main.register_graphic_view(self)
 
         self.dragEvent.connect(self.propagate_move_event)
+
+    def _update_background_brush(self) -> None:
+        """Update the background brush based on the current theme."""
+        if self.main.settings.dark_theme_enabled:
+            # Use a lighter gray for dark theme to make black borders visible
+            self.setBackgroundBrush(QColor(0x96, 0x3C, 0x3D))
+        else:
+            # Use system default for light theme
+            self.setBackgroundBrush(self.main.palette().brush(QPalette.ColorRole.Window))
 
     def auto_fit_button_clicked(self, checked: bool) -> None:
         self.autofit = checked
